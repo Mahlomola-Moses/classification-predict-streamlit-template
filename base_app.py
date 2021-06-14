@@ -31,6 +31,18 @@ import pandas as pd
 # Vectorizer
 news_vectorizer = open("resources/tfidfvect.pkl","rb")
 tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl file
+def switch_demo(x):
+
+	switcher = {
+			0:"Neutral",
+			1: "Pro",
+			2: "News",
+			-1: "Anti"
+			
+			
+		}
+
+	return switcher.get(x[0], x)
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
@@ -76,7 +88,7 @@ def main():
 			# When model has successfully run, will print prediction
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
-			st.success("Text Categorized as: {}".format(prediction))
+			st.success("Actual sentiment as : "+switch_demo(prediction))
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
