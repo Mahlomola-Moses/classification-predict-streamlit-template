@@ -228,7 +228,7 @@ def main():
 			if method == methods[1]:	
 				column = st.selectbox('3. Select an evaluation metric:',
 						     metrics[:5])
-				if metrics[0]:
+				if column == metrics[0]:
 					a = 1+1
 				
 				else:
