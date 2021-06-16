@@ -41,12 +41,6 @@ def load_data(df):
 	dataframe = pd.read_csv(df + '.csv', index_col = 0)
 	return dataframe
 
-#load_data('clf_performance_df')
-#load_data('ordered_CV_clf_performance_df')
-#load_data('CV_best_performing_df')
-#load_data('best_performing_df')
-#load_data('metrics_new_data_split_df')
-
 def switch_demo(x):
 	switcher = {
 			0:"Neutral",
@@ -110,7 +104,7 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
     before = models_performance.sort_values(column,ascending=True)
     
     if column == 'Execution Time':
-        xlim = [0.9, 50]
+        xlim = [0.9, 220]
         after = tuned_models_performance.sort_values(column,ascending=False)
         before = models_performance.sort_values(column,ascending=False)
     else:
@@ -130,7 +124,7 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
                         edgecolor = 'red', label = 'BEFORE TUNING')
     ax.set_title(column)
 
-    return plt.show()
+    return st.pyplot(fig), st.dataframe(tuned_models_performance.sort_values(column, ascending= False))
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
@@ -186,16 +180,17 @@ def main():
 
 		clf_performance_df = load_data('clf_performance_df')
 		ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
-		#best_performing_df 
+		best_performing_df = load_data('best_performing_df')
+		CV_best_performing_df = load_data('CV_best_performing_df')
 		#metrics_new_data_split_df 
 		options = ["All models", "Top 4 off the shelf", "Hyperparameter tuned Top 4", "The Best"]
 		option = st.selectbox('1. Select models to evaluate:', options)	
 		methods = [' ', 'Train Test Split', 'Cross Validation']
 		method = st.selectbox('2. Select an evaluation method:', methods)
+		metrics = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 
 		if option == options[0]:
 			if method == methods[1]:
-				metrics = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 				column = st.selectbox('3. Select an evaluation metric:',
 						     metrics[:5])
 				if options[0]:				 
@@ -204,9 +199,8 @@ def main():
 				graph_model_performances(clf_performance_df, column)
 			
 			elif method == methods[2]:
-				metrics0 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 				column = st.selectbox('3. Select an evaluation metric:',
-						     metrics0[4:])
+						     metrics[4:])
 				if options[0]:				 
 						a = 1+1
 				
@@ -214,10 +208,9 @@ def main():
 
 		
 		elif option == options[1]:
-			if method == methods[1]:
-				metrics00 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
+			if method == methods[1]:	
 				column = st.selectbox('3. Select an evaluation metric:',
-						     metrics00[:5])
+						     metrics[:5])
 				if options[0]:				 
 						a = 1+1
 				graph_model_performances(clf_performance_df.sort_values('F1-Accuracy')[-4:], column)
@@ -225,11 +218,30 @@ def main():
 			elif method == methods[2]:
 				metrics000 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 				column = st.selectbox('3. Select an evaluation metric:',
-						     metrics000[4:])
+						     metrics[4:])
 				if options[0]:				 
 						a = 1+1
 				
 				graph_model_performances(ordered_CV_clf_performance_df[:-4], column)
+		
+		elif option == options[2]: 
+			if method == methods[1]:	
+				column = st.selectbox('3. Select an evaluation metric:',
+						     metrics[:5])
+				if metrics[0]:
+					a = 1+1
+				
+				else:
+				    graph_model_improvement(best_performing_df, clf_performance_df, column)
+			
+			elif method == methods[2]:
+				metrics000 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
+				column = st.selectbox('3. Select an evaluation metric:',
+						     metrics[4:])
+				if options[0]:				 
+						a = 1+1
+				
+				graph_model_improvement(CV_best_performing_df, ordered_CV_clf_performance_df, column)
 
 			
 
