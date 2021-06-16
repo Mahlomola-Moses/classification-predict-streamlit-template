@@ -220,7 +220,7 @@ def main():
 						     metrics00[:5])
 				if options[0]:				 
 						a = 1+1
-				graph_model_performances(clf_performance_df[-4:], column)
+				graph_model_performances(clf_performance_df.sort_values('F1-Accuracy')[-4:], column)
 			
 			elif method == methods[2]:
 				metrics000 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
