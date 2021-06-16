@@ -184,51 +184,56 @@ def main():
 		st.header("Model Assessment")
 		st.subheader("Graphing the Performance of Different Machine Learning Models")
 
-		#ordered_CV_clf_performance_df 
-		#CV_best_performing_df
+		clf_performance_df = load_data('clf_performance_df')
+		ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
 		#best_performing_df 
 		#metrics_new_data_split_df 
-		
-		options = ["1. All models", "2. Top 4 off the shelf", "3. Hyperparameter tuned Top 4", "4. The Best"]
-		
-		option = st.selectbox('1. Select models to evaluate:',
-						     options)
-		if options[0]:
-			clf_performance_df = load_data('clf_performance_df')
-			ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
-			options = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
-			methods = [' ', 'Train Test Split', 'Cross Validation']
-			method = st.selectbox('2. Select an evaluation method:',
-						     methods)
+		options = ["All models", "Top 4 off the shelf", "Hyperparameter tuned Top 4", "The Best"]
+		option = st.selectbox('1. Select models to evaluate:', options)	
+		methods = [' ', 'Train Test Split', 'Cross Validation']
+		method = st.selectbox('2. Select an evaluation method:', methods)
+
+		if option == options[0]:
 			if method == methods[1]:
+				metrics = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 				column = st.selectbox('3. Select an evaluation metric:',
-						     options[:5])
+						     metrics[:5])
 				if options[0]:				 
 						a = 1+1
 				
 				graph_model_performances(clf_performance_df, column)
 			
-			if method == methods[2]:
+			elif method == methods[2]:
+				metrics0 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 				column = st.selectbox('3. Select an evaluation metric:',
-						     options[4:])
+						     metrics0[4:])
 				if options[0]:				 
 						a = 1+1
 				
 				graph_model_performances(ordered_CV_clf_performance_df, column)
+
+		
+		elif option == options[1]:
+			if method == methods[1]:
+				metrics00 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
+				column = st.selectbox('3. Select an evaluation metric:',
+						     metrics00[:5])
+				if options[0]:				 
+						a = 1+1
+				graph_model_performances(clf_performance_df[-4:], column)
 			
-			#if methods[1] and options not in ['CV_Mean', 'CV_Std']:
-			#	print("Visualising " +str(option)+ ' after Train Test Split')
-			#	graph_model_performances(clf_performance_df, column)
-			#if methods[2] and options in ['CV_Mean', 'CV_Std']:
-			#	graph_model_performances(ordered_CV_clf_performance_df, column)
+			elif method == methods[2]:
+				metrics000 = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
+				column = st.selectbox('3. Select an evaluation metric:',
+						     metrics000[4:])
+				if options[0]:				 
+						a = 1+1
+				
+				graph_model_performances(ordered_CV_clf_performance_df[:-4], column)
 
 			
 
 			
-
-		#graph_model_performances()
-		#graph_model_improvement()
-		#st.pyplot()
 
 
 # Required to let Streamlit instantiate our web app.  
