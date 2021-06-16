@@ -71,24 +71,22 @@ def graph_model_performances(df, column):
 				df = df.sort_values(column, ascending=False)
 				xlim = [0.6, 295]  
 			if column == 'CV_Mean':
-				xlim = [0.6, 0.76]
+				xlim = [0.6, 0.76]			
 			if column == 'CV_Std':
 				xlim = [0.002, 0.009]
 			if 'Flair_TextClassifier' in df.index: 
-				figsize = (14, 5) 
-				legend = False
+				figsize = (14, 5.5) 			
 				title = column
+	
 			else:
-				figsize = (10, 8)
-				legend = True 
+				figsize = (10, 5.5) 
 				title = False 
 
 			fig, ax = plt.subplots(figsize=figsize, dpi = 550)
-			
 
-			df.plot(y=column, kind='barh', xlim=xlim, color= 'cyan', edgecolor = 'blue', 
-							fontsize=16, legend = legend, title= title, ax = ax)
-			plt.legend(prop={'size': 18})
+			df.plot(y=column, kind='barh', xlim=xlim, color= '#18330C', edgecolor = '#8C1010', 
+							fontsize=16, title= title, ax = ax, width =0.3)
+		
 		
 		return  st.pyplot(fig), st.dataframe(df.sort_values(column, ascending= False))
 
@@ -110,7 +108,7 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
     else:
         xlim = [0.55, 0.8]
     
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5.5), dpi = 550)
     ax.set_xlim(xlim)
     plt.rcParams['font.size'] = '12'
 
@@ -120,7 +118,7 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
 
     after_tuning = ax.barh(y= models_after_tuning, width= metrics_after, height =0.3, color= 'blue', 
                                    edgecolor = 'red',label = 'AFTER TUNING')
-    before_tuning = ax.barh(y=models_after_tuning, width= metrics_before, height =0.3, color= 'cyan', 
+    before_tuning = ax.barh(y=models_after_tuning, width= metrics_before, height =0.3, color= '#18330C', 
                         edgecolor = 'red', label = 'BEFORE TUNING')
     ax.set_title(column)
 
@@ -182,7 +180,8 @@ def main():
 		ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
 		best_performing_df = load_data('best_performing_df')
 		CV_best_performing_df = load_data('CV_best_performing_df')
-		#metrics_new_data_split_df 
+		metrics_new_data_split_df = load_data('metrics_new_data_split_df')
+
 		options = ["All models", "Top 4 off the shelf", "Hyperparameter tuned Top 4", "The Best"]
 		option = st.selectbox('1. Select models to evaluate:', options)	
 		methods = [' ', 'Train Test Split', 'Cross Validation']
@@ -222,7 +221,7 @@ def main():
 				if options[0]:				 
 						a = 1+1
 				
-				graph_model_performances(ordered_CV_clf_performance_df[:-4], column)
+				graph_model_performances(ordered_CV_clf_performance_df[:-5], column)
 		
 		elif option == options[2]: 
 			if method == methods[1]:	
@@ -242,6 +241,21 @@ def main():
 						a = 1+1
 				
 				graph_model_improvement(CV_best_performing_df, ordered_CV_clf_performance_df, column)
+
+		elif option == options[3]: 
+			if method == methods[1]:	
+				column = st.selectbox('3. Select an evaluation metric:',
+						     metrics[:5])
+				if column == metrics[0]:
+					a = 1+1
+				
+				else:
+				    graph_model_performances(metrics_new_data_split_df, column)
+			
+			elif method == methods[2]:
+				st.write('Comapring the models to the flair text classifier neural network by means of cross validation \
+				is too computationally expensive and therefore only a train test split was carried out.')
+				
 
 			
 
