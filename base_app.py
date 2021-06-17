@@ -31,6 +31,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from streamlit.caching import cache
 
+import re
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+
 # Vectorizer
 news_vectorizer = open("resources/tfidfvect.pkl","rb")
 tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl file
@@ -43,11 +47,42 @@ def load_data(df):
 
 def switch_demo(x):
 	switcher = {
-			0:"Neutral",
-			1: "Pro",
+			0:"Neutral:",
+			1: "Pro: Believes in man-made climate change",
 			2: "News",
-			-1: "Anti" }
+			-1: "Anti: Doesn't believe in man-made climate change" }
 	return switcher.get(x[0], x)
+
+def clean_tweets(message):
+    """
+    A function to preprocess tweets for model training and exploratory data analysis
+    :param message: String, message to be cleaned
+    :param remove_stopwords: Bool, defualt is False, set to true to remove stopwords
+    :param eda: Bool, defualt is False, set to true to return cleaned but readable string
+    :param lemma: Bool, deafautl is True, lemmatize.
+    return: String, message
+    """    
+    # replace all url-links with url-web
+    url = r'http[s]?://(?:[A-Za-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9A-Fa-f][0-9A-Fa-f]))+'
+    message = re.sub(url, 'web', message)
+    # removing all punctuation and digits
+    message = re.sub(r'[-]',' ',message)
+    message = re.sub(r'[_]', ' ', message)
+    message = re.sub(r'[^\w\s]','',message)
+    message = re.sub('[0-9]+', '', message) 
+    message = re.sub(r'[!"#$%&()*+,-./:;<=>?@[\]^_`{|}~âã¢¬¦¢’‘‚…]', ' ', message)
+    message = re.sub("â|ã|Ã|Â", " ", message)  # removes strange character 
+    message = re.sub("\\s+", " ", message)  # fills white spaces
+    message = message.lstrip()  # removes whitespaces before string
+    message = message.rstrip()  # removes whitespaces after string 
+   
+    # lemmatizing all words
+    lemmatizer = WordNetLemmatizer()
+    message = [lemmatizer.lemmatize(token) for token in message.split(" ")]
+    message = [lemmatizer.lemmatize(token, "v") for token in message]
+    message = " ".join(message)
+
+    return message
 
 def graph_model_performances(df, column):
 		"""
@@ -135,10 +170,10 @@ def main():
 	# these are static across all pages
 	st.title("Tweet Classifer")
 	st.subheader("Climate change tweet classification")
-
+	st.header('\n \n')
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
-	options = ["Prediction", "Information", "Model Assessment"]
+	options = ["Home", "Make A Prediction", "Information", "Assess Our Trained Models"]
 	selection = st.sidebar.selectbox("Choose Option", options)
 
 	# Building out the "Information" page
@@ -152,16 +187,17 @@ def main():
 			st.write(raw[['sentiment', 'message']]) # will write the df to the page
 
 	# Building out the predication page
-	if selection == "Prediction":
-		options = ['Linear Support Vector', 'Logistic Regression', 'SGD Classifier', ' Ridge Classifier']	
-		st.sidebar.selectbox('Choose Model', options)
-		st.info("Prediction with ML Models")
+	if selection == "Make A Prediction":
+		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', ' Ridge Classifier']	
+		st.info("Select a classification model and enter some text to predict the sentiment.")
+		st.selectbox('Select A Model', options)
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","Type Here")
+		cleaned_tweet_text = clean_tweets(tweet_text)
 
 		if st.button("Classify"):
 			# Transforming user input with vectorizer
-			vect_text = tweet_cv.transform([tweet_text]).toarray()
+			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
 			# Load your .pkl file with the model of your choice + make predictions
 			# Try loading in multiple models to give the user a choice
 			predictor = joblib.load(open(os.path.join("resources/LinearSVC.pkl"),"rb"))
@@ -173,11 +209,10 @@ def main():
 			st.success("Predicted sentiment as : "+switch_demo(prediction))
 
 
-	if selection == "Model Assessment":
+	if selection == "Assess Our Trained Models":
 		st.header('\n \n')
-		
 		st.header("Model Assessment")
-		st.subheader("Graphing the Performance of Different Machine Learning Models")
+		st.info("Compare our trained machine learning models below")
 
 		clf_performance_df = load_data('clf_performance_df')
 		ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
@@ -185,10 +220,10 @@ def main():
 		CV_best_performing_df = load_data('CV_best_performing_df')
 		metrics_new_data_split_df = load_data('metrics_new_data_split_df')
 
-		options = ["All models", "Top 4 off the shelf", "Hyperparameter tuned Top 4", "The Best"]
+		options = ["All models", "Top 4", "Hyperparameter tuned Top 4", "The Best"]
 		option = st.selectbox('1. Select models to evaluate:', options)	
 		methods = [' ', 'Train Test Split', 'Cross Validation']
-		method = st.selectbox('2. Select an evaluation method:', methods)
+		method = st.selectbox('2. Select the training method:', methods)
 		metrics = [' ', 'F1-Accuracy', 'F1-Macro', 'F1-Weighted', 'Execution Time', 'CV_Mean', 'CV_Std']	
 
 		if option == options[0]:
