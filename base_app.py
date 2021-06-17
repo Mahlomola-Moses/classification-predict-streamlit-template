@@ -97,11 +97,11 @@ def graph_model_performances(df, column):
 			df = df.sort_values(column, ascending=True)
 			
 			if column == 'F1-Weighted':
-				xlim = [0.5, 0.8]
+				xlim = [0.6, 0.81]
 			if column == 'F1-Accuracy':
-				xlim = [0.6, 0.82]
+				xlim = [0.6, 0.81]
 			if column == 'F1-Macro':
-				xlim = [0.2, 0.73]  
+				xlim = [0.5, 0.8]  
 			if column == 'Execution Time':
 				df = df.sort_values(column, ascending=False)
 				xlim = [0.6, 295]  
@@ -110,11 +110,11 @@ def graph_model_performances(df, column):
 			if column == 'CV_Std':
 				xlim = [0.002, 0.009]
 			if 'Flair_TextClassifier' in df.index: 
-				figsize = (14, 5.5) 			
+				figsize = (14, 5.8) 			
 				title = column
 	
 			else:
-				figsize = (10, 5.5) 
+				figsize = (10, 5.8) 
 				title = False 
 
 			fig, ax = plt.subplots(figsize=figsize, dpi = 550)
@@ -141,9 +141,9 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
         after = tuned_models_performance.sort_values(column,ascending=False)
         before = models_performance.sort_values(column,ascending=False)
     else:
-        xlim = [0.55, 0.8]
+        xlim = [0.6, 0.8]
     
-    fig, ax = plt.subplots(figsize=(10, 5.5), dpi = 550)
+    fig, ax = plt.subplots(figsize=(10, 5.8), dpi = 550)
     ax.set_xlim(xlim)
     plt.rcParams['font.size'] = '12'
 
@@ -212,7 +212,7 @@ def main():
 	if selection == "Assess Our Trained Models":
 		st.header('\n \n')
 		st.header("Model Assessment")
-		st.info("Compare our trained machine learning models below")
+		st.info("Graph the performance of our trained machine learning models below")
 
 		clf_performance_df = load_data('clf_performance_df')
 		ordered_CV_clf_performance_df = load_data('ordered_CV_clf_performance_df')
