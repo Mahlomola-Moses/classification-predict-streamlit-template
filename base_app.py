@@ -170,10 +170,10 @@ def main():
 	# these are static across all pages
 	st.title("Tweet Classifer")
 	st.subheader("Climate change tweet classification")
-	st.header('\n \n')
+	st.header('\n')
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
-	options = ["Home", "Make A Prediction", "Information", "Assess Our Trained Models"]
+	options = ["Information", "Make A Prediction",  "Gain Insight", "Assess Our Models"]
 	selection = st.sidebar.selectbox("Choose Option", options)
 
 	# Building out the "Information" page
@@ -208,27 +208,28 @@ def main():
 			# When model has successfully run, will print prediction
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
-			st.success("Predicted sentiment as : "+switch_demo(prediction))
+			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 		
 		elif classify and model == options[1]:   # Logistic Regression
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
 			predictor = joblib.load(open(os.path.join("resources/LogReg.pkl"),"rb"))
 			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as : "+switch_demo(prediction))
+			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 		
 		elif classify and model == options[2]:   # SGDClassifier
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
 			predictor = joblib.load(open(os.path.join("resources/SGDClassifier.pkl"),"rb"))
 			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as : "+switch_demo(prediction))
+			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 		
 		elif classify and model == options[3]:   # Ridge
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
 			predictor = joblib.load(open(os.path.join("resources/RidgeClassifier.pkl"),"rb"))
 			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as : "+switch_demo(prediction))
+			st.success("Predicted sentiment as: "+ switch_demo(prediction))
+			
 
-	if selection == "Assess Our Trained Models":
+	if selection == "Assess Our Models":
 		st.header('\n \n')
 		st.header("Model Assessment")
 		st.info("Graph the performance of our trained machine learning models below")
@@ -314,10 +315,29 @@ def main():
 				is too computationally expensive and therefore only a train test split was carried out.')
 				
 
-			
+	if selection == "Gain Insight":
+		st.header('\n')
+		st.header("Exploratory Data Analysis")
+		st.info('Explore the labled data.')
+		
+		sentiment1 = st.sidebar.checkbox('Anti')
+		sentiment2 = st.sidebar.checkbox('Neutral')
+		sentiment3 = st.sidebar.checkbox('Pro')
+		sentiment4 = st.sidebar.checkbox('News')
+		wordcloud = st.sidebar.checkbox('Wordclouds')
+		hashtags = st.sidebar.checkbox('Hashtags')
+		mentions = st.sidebar.checkbox('Mentions')
+		message_len = st.sidebar.checkbox('Message length')
 
-			
-
+		if sentiment1:
+			st.write('Information on tweets labled Anti')
+		if sentiment2:
+			st.write('Information on tweets labled Neutral')
+		if sentiment3:
+			st.write('Information on tweets labled Pro')
+		if sentiment4:
+			st.write('Information on tweets labled News')
+		
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
