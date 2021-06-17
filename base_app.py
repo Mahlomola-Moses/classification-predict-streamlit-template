@@ -337,6 +337,11 @@ def main():
 			st.write('Information on tweets labled Pro')
 		if sentiment4:
 			st.write('Information on tweets labled News')
+		if wordcloud: 
+			
+		if hashtags:
+		if mentions:
+		if message_len:
 		
 
 # Required to let Streamlit instantiate our web app.  
