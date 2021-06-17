@@ -188,14 +188,16 @@ def main():
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
-		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', ' Ridge Classifier']	
+		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', 'Ridge Classifier']	
 		st.info("Select a classification model and enter some text to predict the sentiment.")
-		st.selectbox('Select A Model', options)
+		model = st.selectbox('Select A Model', options)
+
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","Type Here")
 		cleaned_tweet_text = clean_tweets(tweet_text)
+		classify = st.button("Classify")
 
-		if st.button("Classify"):
+		if classify and model == options[0]:   # Prediction with LinearSVC
 			# Transforming user input with vectorizer
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
 			# Load your .pkl file with the model of your choice + make predictions
@@ -207,7 +209,24 @@ def main():
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
 			st.success("Predicted sentiment as : "+switch_demo(prediction))
-
+		
+		elif classify and model == options[1]:   # Logistic Regression
+			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+			predictor = joblib.load(open(os.path.join("resources/LogReg.pkl"),"rb"))
+			prediction = predictor.predict(vect_text)
+			st.success("Predicted sentiment as : "+switch_demo(prediction))
+		
+		elif classify and model == options[2]:   # SGDClassifier
+			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+			predictor = joblib.load(open(os.path.join("resources/SGDClassifier.pkl"),"rb"))
+			prediction = predictor.predict(vect_text)
+			st.success("Predicted sentiment as : "+switch_demo(prediction))
+		
+		elif classify and model == options[3]:   # Ridge
+			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+			predictor = joblib.load(open(os.path.join("resources/RidgeClassifier.pkl"),"rb"))
+			prediction = predictor.predict(vect_text)
+			st.success("Predicted sentiment as : "+switch_demo(prediction))
 
 	if selection == "Assess Our Trained Models":
 		st.header('\n \n')
