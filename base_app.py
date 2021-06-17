@@ -153,6 +153,8 @@ def main():
 
 	# Building out the predication page
 	if selection == "Prediction":
+		options = ['Linear Support Vector', 'Logistic Regression', 'SGD Classifier', ' Ridge Classifier']	
+		st.sidebar.selectbox('Choose Model', options)
 		st.info("Prediction with ML Models")
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","Type Here")
@@ -169,6 +171,7 @@ def main():
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
 			st.success("Predicted sentiment as : "+switch_demo(prediction))
+
 
 	if selection == "Model Assessment":
 		st.header('\n \n')
