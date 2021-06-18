@@ -30,10 +30,11 @@ import pandas as pd
 
 #displaying
 import numpy as np
-import plotly.express as px
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
+import time
+import seaborn as sns
+sns.set(font_scale=1.4)
+import matplotlib.pyplot as plot
+
 #Read the saved csv of the performance summary into a dataframe
 clf_performance_df = pd.read_csv('clf_performance_df.csv', index_col = 0) 
 # Vectorizer
@@ -93,12 +94,19 @@ def main():
 	# Creates a main title and subheader on your page -
 	# these are static across all pages
 	st.title("Tweet Classifer")
+	
+	cols = ["F1-Weighted", "F1-Accuracy",'F1-Macro','Execution Time']
+	colsSelection = st.sidebar.selectbox("Choose Column", cols)
+	st.bar_chart(clf_performance_df[colsSelection])
 	st.subheader("Climate change tweet classification")
-
+	
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
 	options = ["Prediction", "Information"]
+
 	selection = st.sidebar.selectbox("Choose Option", options)
+
+	
 
 	# Building out the "Information" page
 	if selection == "Information":
@@ -128,7 +136,8 @@ def main():
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
 			st.success("Predicted sentiment as : "+switch_demo(prediction))
-			display(clf_performance_df)
+			graph_model_performances(clf_performance_df, 'F1-Weighted')
+			st.pyplot()
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
