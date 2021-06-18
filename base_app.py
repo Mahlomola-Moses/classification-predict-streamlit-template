@@ -192,29 +192,29 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
     ax.set_title(column)
 
     return st.pyplot(fig), st.dataframe(tuned_models_performance.sort_values(column, ascending= False))
-@st.cache
-def plot_message_len(messages, title):
+
+def plot_message_len(messages):
 	fig, ax = plt.subplots(figsize=(30,10))
 
 	#Positive 
 	sns.distplot(messages, hist=True, kde=True,
 				bins=10, color = 'blue', 
 				ax = ax)
-	ax.set_title(title)
+	fig, ax = plt.subplots(dpi = 600, figsize=(6, 9))
 	ax.set_xlabel('Message Length')
 	ax.set_ylabel('Density')
 	return st.pyplot(fig)
-@st.cache
+
 def plot_hashtags(df, n):
 	# selecting top 10 most frequent hashtags     
 	df = df.nlargest(columns="Count", n = n) 
-	fig, ax = plt.subplots(figsize=(16,5))
+	fig, ax = plt.subplots(figsize = (12.5, 10), dpi = 500)
 	ax = sns.barplot(data=df, x= "Count", y = "Hashtag", palette='winter')
-	ax.set(xlabel = 'Count', title= 'Anti Hashtags')
+	ax.set(xlabel = 'Count')
 	return st.pyplot(fig)
 	
 def create_wordcloud(tweets, n):
-	fig, ax = plt.subplots(figsize=(22, 15), dpi = 1500)
+	fig, ax = plt.subplots(figsize=(22, 15), dpi = 1000)
 	wc = WordCloud(width=800, height=500, 
                background_color='black',
                max_words = n,
@@ -269,10 +269,6 @@ def load_bulk_data():
 
 	return pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list
 
-full_title = ['Popular words for News tweets',
-              'Popular words for Pro tweets',
-              'Popular words for Neutral tweets',
-              'Popular words for Anti tweets']
 pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list = load_bulk_data()
 
 # The main function where we will build the actual app
@@ -281,9 +277,6 @@ def main():
 
 	# Creates a main title and subheader on your page -
 	# these are static across all pages
-	st.title("Tweet Classifer")
-	st.subheader("Climate change tweet classification")
-	st.header('\n')
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
 	options = ["Information", "Make A Prediction",  "Gain Insight", "Assess Our Models"]
@@ -291,6 +284,9 @@ def main():
 
 	# Building out the "Information" page
 	if selection == "Information":
+		st.title("Tweet Classifer")
+		st.subheader("Climate change tweet classification")
+		st.header('\n')
 		st.info("General Information")
 		# You can read a markdown file from supporting resources folder
 		st.markdown("Some information here")
@@ -301,6 +297,9 @@ def main():
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
+		st.title("Tweet Classifer")
+		st.subheader("Climate change tweet classification")
+		st.header('\n')
 		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', 'Ridge Classifier']	
 		st.info("Select a classification model and enter some text to predict the sentiment.")
 		model = st.selectbox('Select A Model', options)
@@ -343,8 +342,8 @@ def main():
 			
 
 	if selection == "Assess Our Models":
-		st.header('\n \n')
-		st.header("Model Assessment")
+		st.subheader("Climate change tweet classification")
+		st.title("Model Assessment")
 		st.info("Graph the performance of our trained machine learning models below")
 
 		clf_performance_df = load_data('clf_performance_df')
@@ -430,7 +429,8 @@ def main():
 
 	if selection == "Gain Insight":
 		st.header("Exploratory Data Analysis")
-		st.info('Explore the labled data.')
+		st.subheader('Explore the labled data.')
+		st.subheader('\n ')
 		st.sidebar.markdown('Select sentiment:')
 		ANTI = st.sidebar.checkbox('Anti')
 		NEUTRAL = st.sidebar.checkbox('Neutral')
@@ -443,15 +443,15 @@ def main():
 		message_len = st.sidebar.checkbox('Message length')
 
 		if ANTI:
-			st.write('Information on tweets labled Anti')
+			st.write('\+ tweets labled Anti')
 		if NEUTRAL:
-			st.write('Information on tweets labled Neutral')
+			st.write('\+ tweets labled Neutral')
 		if PRO:
-			st.write('Information on tweets labled Pro')
+			st.write('\+ tweets labled Pro')
 		if NEWS:
-			st.write('Information on tweets labled News')
+			st.write('\+ tweets labled News')
 		if wordcloud: 
-			st.header('Wordcloud')
+			st.title('Wordcloud')
 			n = st.slider('Max Words',15, 60, 30, 15)
 			if ANTI:
 				st.subheader('Most Popular Words For Anti Tweets')
@@ -459,6 +459,47 @@ def main():
 			if NEUTRAL:
 				st.subheader('Most Popular Words For Neutral Tweets')
 				create_wordcloud(tweet_list[2], n)
+			if PRO:
+				st.subheader('Most Popular Words For Pro Tweets')
+				create_wordcloud(tweet_list[1], n)
+			if NEWS:
+				st.subheader('Most Popular Words For News Tweets')
+				create_wordcloud(tweet_list[0], n)
+		if hashtags:
+			st.title('Popular Hashtags')
+			h = st.slider('Max Hashtags',8, 32, 12, 4)
+			if ANTI:
+				st.subheader('Most Popular Hashtags for Anti Tweets')
+				plot_hashtags(anti_hash_df, h)
+			if NEUTRAL:
+				st.subheader('Most Popular Hashtags For Neutral Tweets')
+				plot_hashtags(neutral_hash_df, h)
+			if PRO:
+				st.subheader('Most Popular Hashtags For Pro Tweets')
+				plot_hashtags(pro_hash_df, h)
+			if NEWS:
+				st.subheader('Most Popular Hashtags For News Tweets')
+				plot_hashtags(news_hash_df, h)
+		if message_len:
+			st.title('Tweet Lengths')
+			if ANTI:
+				st.subheader('Tweet length Distribution - Anti')
+				plot_message_len(anti_len)
+			if NEUTRAL:
+				st.subheader('Tweet length Distribution - Neautral')
+				plot_message_len(neutral_len)
+			if PRO:
+				st.subheader('Tweet length Distribution - Pro')
+				plot_message_len(pro_len)
+			if NEWS:
+				st.subheader('Tweet length Distribution - News')
+				plot_message_len(news_len)
+
+			
+				
+
+			
+		
 			
 				
 
