@@ -29,11 +29,15 @@ import joblib,os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(font_scale=1.4)
 from streamlit.caching import cache
 
 import re
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from wordcloud import WordCloud
 
 # Vectorizer
 news_vectorizer = open("resources/tfidfvect.pkl","rb")
@@ -53,7 +57,7 @@ def switch_demo(x):
 			-1: "Anti: Doesn't believe in man-made climate change" }
 	return switcher.get(x[0], x)
 
-def clean_tweets(message):
+def clean_tweets(message, remove_stopwords=False, eda = False, lemma=True):
     """
     A function to preprocess tweets for model training and exploratory data analysis
     :param message: String, message to be cleaned
@@ -62,6 +66,13 @@ def clean_tweets(message):
     :param lemma: Bool, deafautl is True, lemmatize.
     return: String, message
     """    
+    if eda == False:
+        # change all words into lower case
+        message = message.lower()
+    
+    if eda == True:
+        message = re.sub('RT|rt','retweet',message)
+
     # replace all url-links with url-web
     url = r'http[s]?://(?:[A-Za-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9A-Fa-f][0-9A-Fa-f]))+'
     message = re.sub(url, 'web', message)
@@ -75,14 +86,37 @@ def clean_tweets(message):
     message = re.sub("\\s+", " ", message)  # fills white spaces
     message = message.lstrip()  # removes whitespaces before string
     message = message.rstrip()  # removes whitespaces after string 
-   
-    # lemmatizing all words
-    lemmatizer = WordNetLemmatizer()
-    message = [lemmatizer.lemmatize(token) for token in message.split(" ")]
-    message = [lemmatizer.lemmatize(token, "v") for token in message]
-    message = " ".join(message)
+    
+    if remove_stopwords == True:     
+        # remove stopwords if wordcloud
+        stop_words = stopwords.words('english')
+        stop_words.append('web')
+        stop_words.append('climate')
+        stop_words.append('change')
+        stop_words.append('global')
+        stop_words.append('warming')
+        stop_words.append('retweet')
+        stop_words.append('u')
+        message = ' '.join([word for word in message.split(' ') if not word in stop_words])
+    
+    if lemma == True:    
+      # lemmatizing all words
+        lemmatizer = WordNetLemmatizer()
+        message = [lemmatizer.lemmatize(token) for token in message.split(" ")]
+        message = [lemmatizer.lemmatize(token, "v") for token in message]
+        message = " ".join(message)
 
     return message
+
+def hashtag_extract(x):
+    """
+    Function to extract the hashtags from the messages column
+    """
+    hashtags = []    
+    for i in x:
+        ht = re.findall(r"#(\w+)", i)
+        hashtags.append(ht)
+    return hashtags
 
 def graph_model_performances(df, column):
 		"""
@@ -158,9 +192,88 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
     ax.set_title(column)
 
     return st.pyplot(fig), st.dataframe(tuned_models_performance.sort_values(column, ascending= False))
+@st.cache
+def plot_message_len(messages, title):
+	fig, ax = plt.subplots(figsize=(30,10))
+
+	#Positive 
+	sns.distplot(messages, hist=True, kde=True,
+				bins=10, color = 'blue', 
+				ax = ax)
+	ax.set_title(title)
+	ax.set_xlabel('Message Length')
+	ax.set_ylabel('Density')
+	return st.pyplot(fig)
+@st.cache
+def plot_hashtags(df, n):
+	# selecting top 10 most frequent hashtags     
+	df = df.nlargest(columns="Count", n = n) 
+	fig, ax = plt.subplots(figsize=(16,5))
+	ax = sns.barplot(data=df, x= "Count", y = "Hashtag", palette='winter')
+	ax.set(xlabel = 'Count', title= 'Anti Hashtags')
+	return st.pyplot(fig)
+	
+def create_wordcloud(tweets, n):
+	fig, ax = plt.subplots(figsize=(22, 15), dpi = 1500)
+	wc = WordCloud(width=800, height=500, 
+               background_color='black',
+               max_words = n,
+               max_font_size=150, random_state=42)
+	wc.generate(tweets)
+	plt.imshow(wc, interpolation='bilinear')
+	plt.axis("off")
+
+	return st.pyplot(fig)
 
 # Load your raw data
-raw = pd.read_csv("resources/train.csv")
+train = pd.read_csv("train.csv")
+@st.cache
+def load_bulk_data():
+
+	pro_len = train[train['sentiment']==1]['message'].str.len()
+	news_len = train[train['sentiment']==2]['message'].str.len()
+	anti_len = train[train['sentiment']==-1]['message'].str.len()
+	neutral_len = train[train['sentiment']==0]['message'].str.len()
+
+	# extracting hashtags from train tweets
+	anti_hashtag = hashtag_extract(train['message'][train['sentiment'] == -1])
+	neutral_hashtag = hashtag_extract(train['message'][train['sentiment'] == 0])
+	pro_hashtag = hashtag_extract(train['message'][train['sentiment'] == 1])
+	news_hashtag = hashtag_extract(train['message'][train['sentiment'] == 2])
+
+	anti_hash = nltk.FreqDist(sum(anti_hashtag,[]))
+	anti_hash_df = pd.DataFrame({'Hashtag': list(anti_hash.keys()),
+					'Count': list(anti_hash.values())})
+	pro_hash = nltk.FreqDist(sum(pro_hashtag,[]))
+	pro_hash_df = pd.DataFrame({'Hashtag': list(pro_hash.keys()),
+					'Count': list(pro_hash.values())})
+	neutral_hash = nltk.FreqDist(sum(neutral_hashtag,[]))
+	neutral_hash_df = pd.DataFrame({'Hashtag': list(neutral_hash.keys()),
+					'Count': list(neutral_hash.values())})
+	news_hash = nltk.FreqDist(sum(news_hashtag,[]))
+	news_hash_df = pd.DataFrame({'Hashtag': list(news_hash.keys()),
+					'Count': list(news_hash.values())})
+
+	train['message_clean_eda']=train['message'].apply(lambda x: clean_tweets(message =x, remove_stopwords=True, 
+																			eda=True, lemma=False))
+
+	news_tweets = ' '.join([text for text in train['message_clean_eda']
+							[train['sentiment'] == 2]])
+	pro_tweets = ' '.join([text for text in train['message_clean_eda']
+						[train['sentiment'] == 1]])
+	neutral_tweets = ' '.join([text for text in train['message_clean_eda']
+							[train['sentiment'] == 0]])
+	anti_tweets = ' '.join([text for text in train['message_clean_eda']
+							[train['sentiment'] == -1]])
+	tweet_list = [news_tweets, pro_tweets,neutral_tweets, anti_tweets]
+
+	return pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list
+
+full_title = ['Popular words for News tweets',
+              'Popular words for Pro tweets',
+              'Popular words for Neutral tweets',
+              'Popular words for Anti tweets']
+pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list = load_bulk_data()
 
 # The main function where we will build the actual app
 def main():
@@ -184,7 +297,7 @@ def main():
 
 		st.subheader("Raw Twitter data and label")
 		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
-			st.write(raw[['sentiment', 'message']]) # will write the df to the page
+			st.write(train[['sentiment', 'message']]) # will write the df to the page
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
@@ -240,7 +353,7 @@ def main():
 		CV_best_performing_df = load_data('CV_best_performing_df')
 		metrics_new_data_split_df = load_data('metrics_new_data_split_df')
 
-		options = ["All models", "Top 4", "Hyperparameter tuned Top 4", "The Best"]
+		options = ["All Models", "Top 4", "Hyperparameter Tuned Top 4", "The Best"]
 		option = st.selectbox('1. Select models to evaluate:', options)	
 		methods = [' ', 'Train Test Split', 'Cross Validation']
 		method = st.selectbox('2. Select the training method:', methods)
@@ -316,29 +429,38 @@ def main():
 				
 
 	if selection == "Gain Insight":
-		st.header('\n')
 		st.header("Exploratory Data Analysis")
 		st.info('Explore the labled data.')
-		
-		sentiment1 = st.sidebar.checkbox('Anti')
-		sentiment2 = st.sidebar.checkbox('Neutral')
-		sentiment3 = st.sidebar.checkbox('Pro')
-		sentiment4 = st.sidebar.checkbox('News')
+		st.sidebar.markdown('Select sentiment:')
+		ANTI = st.sidebar.checkbox('Anti')
+		NEUTRAL = st.sidebar.checkbox('Neutral')
+		PRO = st.sidebar.checkbox('Pro')
+		NEWS = st.sidebar.checkbox('News')
+		st.sidebar.markdown('Select info:')
 		wordcloud = st.sidebar.checkbox('Wordclouds')
 		hashtags = st.sidebar.checkbox('Hashtags')
 		mentions = st.sidebar.checkbox('Mentions')
 		message_len = st.sidebar.checkbox('Message length')
 
-		if sentiment1:
+		if ANTI:
 			st.write('Information on tweets labled Anti')
-		if sentiment2:
+		if NEUTRAL:
 			st.write('Information on tweets labled Neutral')
-		if sentiment3:
+		if PRO:
 			st.write('Information on tweets labled Pro')
-		if sentiment4:
+		if NEWS:
 			st.write('Information on tweets labled News')
 		if wordcloud: 
-			print(" ")	
+			st.header('Wordcloud')
+			n = st.slider('Max Words',15, 60, 30, 15)
+			if ANTI:
+				st.subheader('Most Popular Words For Anti Tweets')
+				create_wordcloud(tweet_list[3], n)
+			if NEUTRAL:
+				st.subheader('Most Popular Words For Neutral Tweets')
+				create_wordcloud(tweet_list[2], n)
+			
+				
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
