@@ -38,11 +38,15 @@ from wordcloud import WordCloud
 news_vectorizer = open("resources/tfidfvect.pkl","rb")
 tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl file
 
-# Model metrics
-@st.cache 
+@st.cache(allow_output_mutation=True, show_spinner=False) 
 def load_data(df):
 	dataframe = pd.read_csv(df + '.csv', index_col = 0)
 	return dataframe
+
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def load_model(model):
+	predictor = joblib.load(open(os.path.join("resources/" + model + ".pkl"),"rb"))
+	return predictor
 
 def switch_demo(x):
 	switcher = {
@@ -189,13 +193,13 @@ def graph_model_improvement(tuned_models_performance, models_performance, column
     return st.pyplot(fig), st.dataframe(tuned_models_performance.sort_values(column, ascending= False))
 
 def plot_message_len(messages):
-	fig, ax = plt.subplots(figsize=(30,10))
+	fig, ax = plt.subplots(dpi = 600, figsize=(15,10))
 
 	#Positive 
 	sns.distplot(messages, hist=True, kde=True,
 				bins=10, color = 'blue', 
 				ax = ax)
-	fig, ax = plt.subplots(dpi = 600, figsize=(6, 9))
+	
 	ax.set_xlabel('Message Length')
 	ax.set_ylabel('Density')
 	return st.pyplot(fig)
@@ -209,7 +213,7 @@ def plot_hashtags(df, n):
 	return st.pyplot(fig)
 	
 def create_wordcloud(tweets, n):
-	fig, ax = plt.subplots(figsize=(22, 15), dpi = 1000)
+	fig, ax = plt.subplots(figsize=(22, 15), dpi = 700)
 	wc = WordCloud(width=800, height=500, 
                background_color='black',
                max_words = n,
@@ -222,7 +226,7 @@ def create_wordcloud(tweets, n):
 
 # Load your raw data
 train = pd.read_csv("train.csv")
-@st.cache
+@st.cache(allow_output_mutation=True, show_spinner=False) 
 def load_bulk_data():
 
 	pro_len = train[train['sentiment']==1]['message'].str.len()
@@ -335,19 +339,19 @@ def main():
 		
 		elif classify and model == options[1]:   # Logistic Regression
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = joblib.load(open(os.path.join("resources/LogReg.pkl"),"rb"))
+			predictor = load_model('LogReg')
 			prediction = predictor.predict(vect_text)
 			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 		
 		elif classify and model == options[2]:   # SGDClassifier
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = joblib.load(open(os.path.join("resources/SGDClassifier.pkl"),"rb"))
+			predictor = load_model('SGDClassifier')
 			prediction = predictor.predict(vect_text)
 			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 		
 		elif classify and model == options[3]:   # Ridge
 			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = joblib.load(open(os.path.join("resources/RidgeClassifier.pkl"),"rb"))
+			predictor = load_model('RidgeClassifier')
 			prediction = predictor.predict(vect_text)
 			st.success("Predicted sentiment as: "+ switch_demo(prediction))
 			
