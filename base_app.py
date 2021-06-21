@@ -213,7 +213,7 @@ def create_wordcloud(tweets, n):
 	wc = WordCloud(width=800, height=500, 
                background_color='black',
                max_words = n,
-               max_font_size=150, random_state=42)
+               max_font_size=110, random_state=42)
 	wc.generate(tweets)
 	plt.imshow(wc, interpolation='bilinear')
 	plt.axis("off")
@@ -265,6 +265,22 @@ def load_bulk_data():
 	return pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list
 
 pro_len, news_len, anti_len, neutral_len, anti_hash_df, pro_hash_df, neutral_hash_df, news_hash_df, tweet_list = load_bulk_data()
+
+def plot_mentions(n):
+			
+			# Extracting Users(@) tags in a column
+			train['users'] = [''.join(re.findall(r'@([a-zA-Z0-9_]{1}[a-zA-Z0-9_]{0,14})', line)) 
+                       if '@' in line else np.nan for line in train.message]
+			fig, axs = plt.subplots(figsize = (20, 35), dpi=600)
+
+			sns.countplot(y="users", hue="sentiment", data = train, palette='bright',
+              order=train.users.value_counts().iloc[:n].index, ax=axs)
+			plt.yticks(fontsize= 25)
+			plt.xticks(fontsize= 20)
+			plt.ylabel('User tags')
+			plt.xlabel('Number of Tags')
+			plt.legend(prop={'size': 30})
+			return st.pyplot(fig)
 
 # The main function where we will build the actual app
 def main():
@@ -489,6 +505,11 @@ def main():
 			if NEWS:
 				st.subheader('Tweet length Distribution - News')
 				plot_message_len(news_len)
+		if mentions:
+			st.subheader('Popular Mentions')
+			n = st.slider('Max Mentions',5, 35, 15, 5)
+			st.header('Top ' + str(n) + ' Most Popular Tags')
+			plot_mentions(n)
 
 			
 				
