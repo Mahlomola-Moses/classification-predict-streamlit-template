@@ -323,6 +323,8 @@ def main():
 
 	# Building out the "Information" page
 	if selection == "About The Project":
+		banner = Image.open('climate-change-definition-meaning crop.jpg')
+		st.image(banner,use_column_width=True)
 		st.header("Climate Change Tweet Classification")
 		st.title("About The Project")	
 		st.header('\n')
@@ -352,6 +354,8 @@ def main():
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
+		banner = Image.open('climate-change-definition-meaning crop.jpg')
+		st.image(banner,use_column_width=True)
 		st.header("Climate Change Tweet Classification")
 		st.title("Tweet Classifer")
 		st.header('\n')
@@ -431,6 +435,8 @@ def main():
 				
 	# Building out the Models page
 	if selection == "Assess Our Models":
+		banner = Image.open('climate-change-definition-meaning crop.jpg')
+		st.image(banner,use_column_width=True)
 		st.header("Climate Change Tweet Classification")
 		st.title("Model Assessment")
 		st.header("\n\n")
@@ -518,6 +524,8 @@ def main():
 				
 	#Building out the EDA page
 	if selection == "Gain Insight":
+		banner = Image.open('climate-change-definition-meaning crop.jpg')
+		st.image(banner,use_column_width=True)
 		st.header("Climate Change Tweet Classification")
 		st.title("Gain Insight")
 		st.subheader('Explore the labled data.')
