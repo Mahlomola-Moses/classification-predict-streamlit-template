@@ -33,6 +33,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud
+from PIL import Image
 
 # Vectorizer
 news_vectorizer = open("resources/tfidfvect.pkl","rb")
@@ -299,6 +300,8 @@ def main():
 
 	# Building the Home Page
 	if selection == "Home":
+		banner = Image.open('climate-change-definition-meaning.jpg')
+		st.image(banner,use_column_width=True)
 		st.header("**Climate Change Tweet Classification**")
 		st.title("")
 		st.subheader("***by Team JS2***")
