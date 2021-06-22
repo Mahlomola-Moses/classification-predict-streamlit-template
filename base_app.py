@@ -294,21 +294,37 @@ def main():
 	# these are static across all pages
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
-	options = ["Information", "Make A Prediction",  "Gain Insight", "Assess Our Models"]
+	options = ["Info", "Make A Prediction",  "Gain Insight", "Assess Our Models"]
 	selection = st.sidebar.selectbox("Choose Option", options)
 
 	# Building out the "Information" page
-	if selection == "Information":
+	if selection == "Info":
 		st.title("Tweet Classifer")
 		st.subheader("Climate change tweet classification")
 		st.header('\n')
-		st.info("General Information")
+		st.info("General Information About This Project")
 		# You can read a markdown file from supporting resources folder
-		st.markdown("Some information here")
+		st.subheader("Problem Statement:\n \
+			Construct a classification algorithm, capable of \
+			accurately predicting whether or not a person believes in climate change.")
+		st.subheader("Building The Solution:\n \
+			We trained a few Supervised Machine Learning Classification Models to take in a message from \
+			twitter and predict its sentiment. Each models accuracy was calculated by comparing the predicted\
+			sentiment to the actual sentiment.")
+		st.subheader("The Data:\n \
+			The actual sentiment of 15819 tweets along with the the message was made available to us for use in training our models.\n \n\
+			The collection of this data was funded by a Canada Foundation for Innovation JELF Grant to Chris Bauch, University of Waterloo. \
+			The dataset aggregates tweets pertaining to climate change collected between Apr 27, 2015 and Feb 21, 2018")
+		st.subheader("The Sentiment:\n \
+			2 - News: the tweet links to factual news about climate change \n\n 1 - Pro: the tweet supports the belief \
+			of man-made climate change \n\n 0 - Neutral: the tweet neither supports nor refutes the belief of man-made\
+			climate change \n\n -1 - Anti: the tweet does not believe in man-made climate change Variable definitions")
 
-		st.subheader("Raw Twitter data and label")
-		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
-			st.write(train[['sentiment', 'message']]) # will write the df to the page
+		st.subheader("Raw Twitter Data and Sentiment")
+		if st.checkbox('Show raw data'): 
+			n_rows = st.slider('Number of rows to display', 10, 50, 20, 5)
+			n = st.slider('Starting row number', 0, 15780)
+			st.table(train[['sentiment', 'message']].iloc[n:n_rows + n].style.hide_index()) # will display df
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
@@ -318,6 +334,7 @@ def main():
 		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', 'Ridge Classifier']	
 		st.info("Select a classification model and enter some text to predict the sentiment.")
 		model = st.selectbox('Select A Model', options)
+		
 
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","Type Here")
