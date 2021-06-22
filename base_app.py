@@ -50,9 +50,9 @@ def load_model(model):
 
 def switch_demo(x):
 	switcher = {
-			0:"Neutral:",
+			0:"Neutral.",
 			1: "Pro: Believes in man-made climate change",
-			2: "News",
+			2: "News.",
 			-1: "Anti: Doesn't believe in man-made climate change" }
 	return switcher.get(x[0], x)
 
@@ -217,7 +217,7 @@ def create_wordcloud(tweets, n):
 	wc = WordCloud(width=800, height=500, 
                background_color='black',
                max_words = n,
-               max_font_size=110, random_state=42)
+               max_font_size=130, random_state=42)
 	wc.generate(tweets)
 	plt.imshow(wc, interpolation='bilinear')
 	plt.axis("off")
@@ -294,42 +294,63 @@ def main():
 	# these are static across all pages
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
-	options = ["Info", "Make A Prediction",  "Gain Insight", "Assess Our Models"]
-	selection = st.sidebar.selectbox("Choose Option", options)
+	options = ["Home", "About The Project", "Make A Prediction", "Assess Our Models", "Gain Insight"]
+	selection = st.sidebar.selectbox("Options", options)
+
+	# Building the Home Page
+	if selection == "Home":
+		st.header("**Climate Change Tweet Classification**")
+		st.title("")
+		st.subheader("***by Team JS2***")
+		st.header("\n\n")
+		st.header("/ Showcasing the machine learning models we've built to classify tweets \
+			about climate change after analysing the sentiment of the tweets.  /")
+		st.header("\n\n")
+		st.header("\n\n")
+		st.header("\n\n")
+		st.header("\n\n")
+		st.write('Navigating the sidebar options:')
+		st.write('**About The Project:** Problem statement, building the solution and introducing the data.')
+		st.write('**Make A Prediction:** Enter text and predict the sentiment using one of our trained classification models')
+		st.write("**Assess Our Models:**  See how well the different models performed and compare to each other \
+			using different evaluation methods and metrics")
+		st.write('**Gain Insight:** Exlore the data through interactive visuals')
+		
+
 
 	# Building out the "Information" page
-	if selection == "Info":
-		st.title("Tweet Classifer")
-		st.subheader("Climate change tweet classification")
+	if selection == "About The Project":
+		st.header("Climate Change Tweet Classification")
+		st.title("About The Project")	
 		st.header('\n')
-		st.info("General Information About This Project")
 		# You can read a markdown file from supporting resources folder
-		st.subheader("Problem Statement:\n \
+		st.subheader("**Problem Statement:**\n \
 			Construct a classification algorithm, capable of \
 			accurately predicting whether or not a person believes in climate change.")
-		st.subheader("Building The Solution:\n \
+		st.subheader("**Building The Solution:**\n \
 			We trained a few Supervised Machine Learning Classification Models to take in a message from \
 			twitter and predict its sentiment. Each models accuracy was calculated by comparing the predicted\
 			sentiment to the actual sentiment.")
-		st.subheader("The Data:\n \
-			The actual sentiment of 15819 tweets along with the the message was made available to us for use in training our models.\n \n\
+		st.subheader("**The Data:**\n \
+			The actual sentiment of 15819 tweets along with the message was made available to us for use in training our models.\n \n\
 			The collection of this data was funded by a Canada Foundation for Innovation JELF Grant to Chris Bauch, University of Waterloo. \
 			The dataset aggregates tweets pertaining to climate change collected between Apr 27, 2015 and Feb 21, 2018")
-		st.subheader("The Sentiment:\n \
+		st.subheader("**The Sentiment:**\n \
 			2 - News: the tweet links to factual news about climate change \n\n 1 - Pro: the tweet supports the belief \
 			of man-made climate change \n\n 0 - Neutral: the tweet neither supports nor refutes the belief of man-made\
 			climate change \n\n -1 - Anti: the tweet does not believe in man-made climate change Variable definitions")
 
-		st.subheader("Raw Twitter Data and Sentiment")
+		st.subheader("**Raw Twitter Data and Sentiment**")
+
 		if st.checkbox('Show raw data'): 
-			n_rows = st.slider('Number of rows to display', 10, 50, 20, 5)
-			n = st.slider('Starting row number', 0, 15780)
+			n_rows = st.slider('Number of rows to display', 10, 50, 15, 5)
+			n = st.slider('Starting row number', 0, 15810)
 			st.table(train[['sentiment', 'message']].iloc[n:n_rows + n].style.hide_index()) # will display df
 
 	# Building out the predication page
 	if selection == "Make A Prediction":
+		st.header("Climate Change Tweet Classification")
 		st.title("Tweet Classifer")
-		st.subheader("Climate change tweet classification")
 		st.header('\n')
 		options = ['Linear Support Vector Classifier', 'Logistic Regression', 'Stochastic Gradient Descent Classifier', 'Ridge Classifier']	
 		st.info("Select a classification model and enter some text to predict the sentiment.")
@@ -341,41 +362,75 @@ def main():
 		cleaned_tweet_text = clean_tweets(tweet_text)
 		classify = st.button("Classify")
 
-		if classify and model == options[0]:   # Prediction with LinearSVC
-			# Transforming user input with vectorizer
-			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			# Load your .pkl file with the model of your choice + make predictions
-			# Try loading in multiple models to give the user a choice
-			predictor = joblib.load(open(os.path.join("resources/LinearSVC.pkl"),"rb"))
-			prediction = predictor.predict(vect_text)
+		if  model == options[0]:   # Prediction with LinearSVC
+			st.header('\n')
+			st.header('\n')
+			st.header('\n')
+			if st.checkbox('Show Model info'):
+				st.write("The objective of the Linear SVC is to fit to the data provided, returning a best fit hyperplane that divides, or categorizes, data.\
+					After getting the hyperplane,the features are fed to the classifier to see what the predicted class is.")
+			if classify:
+				# Transforming user input with vectorizer
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				# Load your .pkl file with the model of your choice + make predictions
+				# Try loading in multiple models to give the user a choice
+				predictor = joblib.load(open(os.path.join("resources/LinearSVC.pkl"),"rb"))
+				prediction = predictor.predict(vect_text)
 
-			# When model has successfully run, will print prediction
-			# You can use a dictionary or similar structure to make this output
-			# more human interpretable.
-			st.success("Predicted sentiment as: "+ switch_demo(prediction))
+				# When model has successfully run, will print prediction
+				# You can use a dictionary or similar structure to make this output
+				# more human interpretable.
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
+					
 		
-		elif classify and model == options[1]:   # Logistic Regression
-			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = load_model('LogReg')
-			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as: "+ switch_demo(prediction))
+		elif model == options[1]:   # Logistic Regression
+			st.header('\n')
+			st.header('\n')
+			st.header('\n')
+			if st.checkbox('Show Model info'):
+				st.write("Logistic Regression is basically a supervised classification algorithm. In a \
+					classification problem, the target variable(or output), y, can take only discrete values for given set\
+						of features(or inputs), X. Just like Linear Regression, it assumes that \
+					the data follows a linear function, Logistic Regression models the data using the sigmoid function.")
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('LogReg')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
 		
-		elif classify and model == options[2]:   # SGDClassifier
-			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = load_model('SGDClassifier')
-			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as: "+ switch_demo(prediction))
+		elif model == options[2]:   # SGDClassifier
+			st.header('\n')
+			st.header('\n')
+			st.header('\n')
+			if st.checkbox('Show Model info'):
+				st.write("SGD is a simple, efficient approach to fitting linear classifiers and regressors under convex loss \
+					functions such as (linear) Support Vector Machines and Logistic Regression. It has received a considerable \
+						amount of attention just recently in the context of large-scale learning.")
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('SGDClassifier')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
 		
-		elif classify and model == options[3]:   # Ridge
-			vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-			predictor = load_model('RidgeClassifier')
-			prediction = predictor.predict(vect_text)
-			st.success("Predicted sentiment as: "+ switch_demo(prediction))
-			
-
+		elif model == options[3]:   # Ridge
+			st.header('\n')
+			st.header('\n')
+			st.header('\n')
+			if st.checkbox('Show Model info'):
+				st.write("The Ridge Classifier, based on Ridge regression method, converts the label data into -1, 1 and solves the\
+					problem with regression method. The highest value in prediction is accepted as a target class and for \
+						multiclass data muilti-output regression is applied.")
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('RidgeClassifier')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
+				
+	# Building out the Models page
 	if selection == "Assess Our Models":
-		st.subheader("Climate change tweet classification")
+		st.header("Climate Change Tweet Classification")
 		st.title("Model Assessment")
+		st.header("\n\n")
 		st.info("Graph the performance of our trained machine learning models below")
 
 		clf_performance_df = load_data('clf_performance_df')
@@ -458,9 +513,10 @@ def main():
 				st.write('Comapring the models to the flair text classifier neural network by means of cross validation \
 				is too computationally expensive and therefore only a train test split was carried out.')
 				
-
+	#Building out the EDA page
 	if selection == "Gain Insight":
-		st.header("Exploratory Data Analysis")
+		st.header("Climate Change Tweet Classification")
+		st.title("Gain Insight")
 		st.subheader('Explore the labled data.')
 		st.subheader('\n ')
 		st.sidebar.markdown('Select sentiment:')
@@ -475,13 +531,13 @@ def main():
 		message_len = st.sidebar.checkbox('Message length')
 
 		if ANTI:
-			st.write('\+ tweets labled Anti')
+			st.write('+ 1296 tweets were labled Anti')
 		if NEUTRAL:
-			st.write('\+ tweets labled Neutral')
+			st.write('+ 2353 tweets were labled Neutral')
 		if PRO:
-			st.write('\+ tweets labled Pro')
+			st.write('+ 8530 tweets were labled Pro')
 		if NEWS:
-			st.write('\+ tweets labled News')
+			st.write('+ 3640 tweets were labled News')
 		if wordcloud: 
 			st.title('Wordcloud')
 			n = st.slider('Max Words',15, 60, 30, 15)
@@ -518,7 +574,7 @@ def main():
 				st.subheader('Tweet length Distribution - Anti')
 				plot_message_len(anti_len)
 			if NEUTRAL:
-				st.subheader('Tweet length Distribution - Neautral')
+				st.subheader('Tweet length Distribution - Neutral')
 				plot_message_len(neutral_len)
 			if PRO:
 				st.subheader('Tweet length Distribution - Pro')
@@ -531,11 +587,13 @@ def main():
 			n = st.slider('Max Mentions',5, 35, 15, 5)
 			st.header('Top ' + str(n) + ' Most Popular Tags')
 			plot_mentions(n)
-
-			
-				
-
-			
+		
+		else:
+			st.header('\n\n')
+			st.header('\n\n')
+			st.header('\n\n')
+			st.info("From the sidebar select the sentiments you would like to compare and \
+				select what type of information should be displayed.")
 		
 			
 				
