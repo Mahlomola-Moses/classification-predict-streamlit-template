@@ -370,12 +370,6 @@ def main():
 		classify = st.button("Classify")
 
 		if  model == options[0]:   # Prediction with LinearSVC
-			st.header('\n')
-			st.header('\n')
-			st.header('\n')
-			if st.checkbox('Show Model info'):
-				st.write("The objective of the Linear SVC is to fit to the data provided, returning a best fit hyperplane that divides, or categorizes, data.\
-					After getting the hyperplane,the features are fed to the classifier to see what the predicted class is.")
 			if classify:
 				# Transforming user input with vectorizer
 				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
@@ -388,9 +382,20 @@ def main():
 				# You can use a dictionary or similar structure to make this output
 				# more human interpretable.
 				st.success("Predicted sentiment as "+ switch_demo(prediction))
+			st.header('\n')
+			st.header('\n')
+			st.header('\n')
+			if st.checkbox('Show Model info'):
+				st.write("The objective of the Linear SVC is to fit to the data provided, returning a best fit hyperplane that divides, or categorizes, data.\
+					After getting the hyperplane,the features are fed to the classifier to see what the predicted class is.")
 					
 		
 		elif model == options[1]:   # Logistic Regression
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('LogReg')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
 			st.header('\n')
 			st.header('\n')
 			st.header('\n')
@@ -399,13 +404,13 @@ def main():
 					classification problem, the target variable(or output), y, can take only discrete values for given set\
 						of features(or inputs), X. Just like Linear Regression, it assumes that \
 					the data follows a linear function, Logistic Regression models the data using the sigmoid function.")
-			if classify:
-				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-				predictor = load_model('LogReg')
-				prediction = predictor.predict(vect_text)
-				st.success("Predicted sentiment as "+ switch_demo(prediction))
 		
 		elif model == options[2]:   # SGDClassifier
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('SGDClassifier')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
 			st.header('\n')
 			st.header('\n')
 			st.header('\n')
@@ -413,13 +418,13 @@ def main():
 				st.write("SGD is a simple, efficient approach to fitting linear classifiers and regressors under convex loss \
 					functions such as (linear) Support Vector Machines and Logistic Regression. It has received a considerable \
 						amount of attention just recently in the context of large-scale learning.")
-			if classify:
-				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-				predictor = load_model('SGDClassifier')
-				prediction = predictor.predict(vect_text)
-				st.success("Predicted sentiment as "+ switch_demo(prediction))
 		
 		elif model == options[3]:   # Ridge
+			if classify:
+				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
+				predictor = load_model('RidgeClassifier')
+				prediction = predictor.predict(vect_text)
+				st.success("Predicted sentiment as "+ switch_demo(prediction))
 			st.header('\n')
 			st.header('\n')
 			st.header('\n')
@@ -427,11 +432,6 @@ def main():
 				st.write("The Ridge Classifier, based on Ridge regression method, converts the label data into -1, 1 and solves the\
 					problem with regression method. The highest value in prediction is accepted as a target class and for \
 						multiclass data muilti-output regression is applied.")
-			if classify:
-				vect_text = tweet_cv.transform([cleaned_tweet_text]).toarray()
-				predictor = load_model('RidgeClassifier')
-				prediction = predictor.predict(vect_text)
-				st.success("Predicted sentiment as "+ switch_demo(prediction))
 				
 	# Building out the Models page
 	if selection == "Assess Our Models":
